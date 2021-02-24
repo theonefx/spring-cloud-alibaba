@@ -80,13 +80,13 @@
 
     <properties>
         <!-- Project revision -->
-        <revision>2.2.6-SNAPSHOT</revision>
+        <revision>2.2.6-dubbo-SNAPSHOT</revision>
 
         <!-- Spring Cloud -->
         <spring.cloud.version>Hoxton.SR9</spring.cloud.version>
 
         <!-- Apache Dubbo -->
-        <dubbo.version>2.7.8</dubbo.version>
+        <dubbo.version>2.7.9</dubbo.version>
         <curator.version>4.0.1</curator.version>
 
         <!-- Apache RocketMQ -->

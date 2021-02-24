@@ -24,9 +24,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.cloud.dubbo.autoconfigure.condition.MissingSpringCloudRegistryConfigPropertyCondition;
-import com.alibaba.cloud.dubbo.bootstrap.DubboBootstrapStartCommandLineRunner;
-import com.alibaba.cloud.dubbo.bootstrap.DubboBootstrapWrapper;
-import com.alibaba.cloud.dubbo.bootstrap.event.DubboBootstrapStartedEvent;
 import com.alibaba.cloud.dubbo.metadata.repository.DubboServiceMetadataRepository;
 import com.alibaba.cloud.dubbo.registry.DubboServiceRegistrationEventPublishingAspect;
 import com.alibaba.cloud.dubbo.registry.event.ServiceInstancePreDeregisteredEvent;
@@ -36,6 +33,7 @@ import com.netflix.appinfo.InstanceInfo;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
 import org.apache.dubbo.config.spring.ServiceBean;
+import org.apache.dubbo.config.spring.context.event.DubboBootstrapStatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,14 +73,12 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  * @author <a href="mailto:chenxilzx1@gmail.com">theonefx</a>
  */
 @Configuration(proxyBeanMethods = false)
-@Import({ DubboServiceRegistrationEventPublishingAspect.class,
-		DubboBootstrapStartCommandLineRunner.class })
-@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled",
-		matchIfMissing = true)
+@Import({ DubboServiceRegistrationEventPublishingAspect.class})
+@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled", matchIfMissing = true)
 @AutoConfigureAfter(name = { EUREKA_CLIENT_AUTO_CONFIGURATION_CLASS_NAME,
 		CONSUL_AUTO_SERVICE_AUTO_CONFIGURATION_CLASS_NAME,
-		"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration" },
-		value = { DubboMetadataAutoConfiguration.class })
+		"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration" }, value = {
+				DubboMetadataAutoConfiguration.class })
 public class DubboServiceRegistrationAutoConfiguration {
 
 	/**
@@ -119,9 +115,11 @@ public class DubboServiceRegistrationAutoConfiguration {
 
 	private Map<ServiceRegistry<Registration>, Set<Registration>> registrations = new ConcurrentHashMap<>();
 
-	@EventListener(DubboBootstrapStartedEvent.class)
-	public void onDubboBootstrapStarted(DubboBootstrapStartedEvent event) {
-		if (!event.getSource().isReady()) {
+	@EventListener(DubboBootstrapStatedEvent.class)
+	public void onDubboBootstrapStarted(DubboBootstrapStatedEvent event) {
+		DubboBootstrap bootstrap = event.getDubboBootstrap();
+		if (!bootstrap.isReady() || !bootstrap.isStarted()
+				|| !bootstrap.isInitialized()) {
 			return;
 		}
 		registrations.forEach(
@@ -180,10 +178,11 @@ public class DubboServiceRegistrationAutoConfiguration {
 		@Autowired
 		private ObjectProvider<Collection<ServiceBean>> serviceBeans;
 
-		@EventListener(DubboBootstrapStartedEvent.class)
-		public void onDubboBootstrapStarted(DubboBootstrapStartedEvent event) {
-			DubboBootstrapWrapper wrapper = event.getSource();
-			if (!wrapper.isReady()) {
+		@EventListener(DubboBootstrapStatedEvent.class)
+		public void onDubboBootstrapStarted(DubboBootstrapStatedEvent event) {
+			DubboBootstrap bootstrap = event.getDubboBootstrap();
+			if (!bootstrap.isReady() || !bootstrap.isStarted()
+					|| !bootstrap.isInitialized()) {
 				return;
 			}
 			registrations.forEach(
@@ -260,10 +259,12 @@ public class DubboServiceRegistrationAutoConfiguration {
 	@AutoConfigureOrder
 	class ConsulConfiguration {
 
-		@EventListener(DubboBootstrapStartedEvent.class)
+		@EventListener(DubboBootstrapStatedEvent.class)
 		public void attachURLsIntoMetadataBeforeReRegist(
-				DubboBootstrapStartedEvent event) {
-			if (!event.getSource().isReady()) {
+				DubboBootstrapStatedEvent event) {
+			DubboBootstrap bootstrap = event.getDubboBootstrap();
+			if (!bootstrap.isReady() || !bootstrap.isStarted()
+					|| !bootstrap.isInitialized()) {
 				return;
 			}
 			registrations.entrySet().removeIf(entry -> {
