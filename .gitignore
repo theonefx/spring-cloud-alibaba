@@ -31,7 +31,6 @@ hs_err_pid*
 .settings
 target
 .DS_Store
-.flattened-pom.xml
 
 # temp ignore
 *.cache

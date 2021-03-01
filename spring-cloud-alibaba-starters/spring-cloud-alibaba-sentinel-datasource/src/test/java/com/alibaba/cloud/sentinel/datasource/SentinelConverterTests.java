@@ -19,19 +19,17 @@ package com.alibaba.cloud.sentinel.datasource;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
+
+import com.alibaba.cloud.commons.io.FileUtils;
 import com.alibaba.cloud.sentinel.datasource.converter.JsonConverter;
 import com.alibaba.cloud.sentinel.datasource.converter.XmlConverter;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
 import org.junit.Test;
-import org.apache.commons.io.FileUtils;
-
-import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -109,8 +107,7 @@ public class SentinelConverterTests {
 		try {
 			return FileUtils.readFileToString(
 					ResourceUtils.getFile(StringUtils.trimAllWhitespace(file)));
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			return "";
 		}
 	}
