@@ -190,8 +190,6 @@ public class DubboCloudRegistry extends FailbackRegistry {
 
 				new ApplicationListener<ServiceInstancesChangedEvent>() {
 
-					private final URL url2subscribe = url;
-
 					@Override
 					@Order
 					public void onApplicationEvent(ServiceInstancesChangedEvent event) {
@@ -217,12 +215,8 @@ public class DubboCloudRegistry extends FailbackRegistry {
 
 		List<URL> subscribedURLs = new LinkedList<>();
 
-		serviceNames.forEach(serviceName -> {
-
-			subscribeURLs(url, subscribedURLs, serviceName,
-					() -> getServiceInstances(serviceName));
-
-		});
+		serviceNames.forEach(serviceName -> subscribeURLs(url, subscribedURLs,
+				serviceName, () -> getServiceInstances(serviceName)));
 
 		// Notify all
 		notifyAllSubscribedURLs(url, subscribedURLs, listener);
@@ -529,7 +523,7 @@ public class DubboCloudRegistry extends FailbackRegistry {
 
 	private boolean containsProviderCategory(URL subscribedURL) {
 		String category = subscribedURL.getParameter(CATEGORY_KEY);
-		return category == null ? false : category.contains(PROVIDER);
+		return category != null && category.contains(PROVIDER);
 	}
 
 	@Override
