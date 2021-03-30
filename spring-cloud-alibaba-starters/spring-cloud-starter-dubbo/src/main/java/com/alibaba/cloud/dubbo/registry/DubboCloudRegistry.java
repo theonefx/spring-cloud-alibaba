@@ -215,8 +215,13 @@ public class DubboCloudRegistry extends FailbackRegistry {
 
 		List<URL> subscribedURLs = new LinkedList<>();
 
-		serviceNames.forEach(serviceName -> subscribeURLs(url, subscribedURLs,
-				serviceName, () -> getServiceInstances(serviceName)));
+		serviceNames.forEach(
+				serviceName -> subscribeURLs(
+								url,
+								subscribedURLs,
+								serviceName,
+								() -> getServiceInstances(serviceName))
+		);
 
 		// Notify all
 		notifyAllSubscribedURLs(url, subscribedURLs, listener);
@@ -463,8 +468,6 @@ public class DubboCloudRegistry extends FailbackRegistry {
 			registerServiceInstancesChangedListener(subscribedURL,
 					new ApplicationListener<ServiceInstancesChangedEvent>() {
 
-						private final URL url2subscribe = subscribedURL;
-
 						@Override
 						@Order(Ordered.LOWEST_PRECEDENCE - 1)
 						public void onApplicationEvent(
@@ -505,21 +508,6 @@ public class DubboCloudRegistry extends FailbackRegistry {
 
 		notifyAllSubscribedURLs(subscribedURL, urls, listener);
 	}
-
-	// private void subscribeDubboMetadataServiceURLs(URL subscribedURL,
-	// NotifyListener listener, Set<String> serviceNames) {
-	//
-	// String serviceInterface = subscribedURL.getServiceInterface();
-	// String version = subscribedURL.getParameter(VERSION_KEY);
-	// String protocol = subscribedURL.getParameter(PROTOCOL_KEY);
-	//
-	// List<ServiceInstance> serviceInstances = getServiceInstances(serviceNames);
-	//
-	// List<URL> urls = dubboMetadataUtils.getDubboMetadataServiceURLs(serviceInstances,
-	// serviceInterface, version, protocol);
-	//
-	// notifyAllSubscribedURLs(subscribedURL, urls, listener);
-	// }
 
 	private boolean containsProviderCategory(URL subscribedURL) {
 		String category = subscribedURL.getParameter(CATEGORY_KEY);
